@@ -25,58 +25,70 @@ function SectionList() {
     catch { alert('Failed to delete section.'); }
   };
 
-  const filtered = sections.filter((s) =>
-    `${s.name} ${s.subject_name ?? ''} ${s.schedule ?? ''}`.toLowerCase().includes(search.toLowerCase())
+  const filtered = sections.filter(sec =>
+    `${sec.name} ${sec.subject_name ?? ''} ${sec.schedule ?? ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div style={styles.page}>
-      <div style={styles.header}>
+    <div>
+      <div style={s.header}>
         <div>
-          <h1 style={styles.title}>Sections</h1>
-          <p style={styles.subtitle}>{sections.length} total sections</p>
+          <h1 style={s.title}>Sections</h1>
+          <p style={s.subtitle}>{sections.length} total sections</p>
         </div>
-        <button onClick={() => navigate('/sections/new')} style={styles.btnPrimary}>+ Create Section</button>
+        <button onClick={() => navigate('/sections/new')} style={s.btnPrimary}>+ Create Section</button>
       </div>
 
-      <input placeholder="Search sections…" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.search} />
-      {error && <div style={styles.error}>{error}</div>}
+      <input placeholder="Search sections..." value={search} onChange={e => setSearch(e.target.value)} style={s.search} />
+      {error && <div style={s.error}>{error}</div>}
 
-      {loading ? <p style={{ color: '#6B7280' }}>Loading…</p> : filtered.length === 0 ? (
-        <div style={styles.empty}>No sections found.</div>
-      ) : (
-        <div style={styles.tableWrap}>
-          <table style={styles.table}>
+      <div style={s.tableWrap}>
+        {loading ? <div style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>Loading sections...</div> : filtered.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>No sections found.</div>
+        ) : (
+          <table style={s.table}>
             <thead>
-              <tr>{['Section', 'Subject', 'Schedule', 'Room', 'Capacity', 'Enrolled', 'Actions'].map((h) => <th key={h} style={styles.th}>{h}</th>)}</tr>
+              <tr style={{ background: '#F8F9FC' }}>
+                {['Subject', 'Section', 'Schedule', 'Room', 'Instructor', 'Capacity', 'Status', 'Actions'].map(h => (
+                  <th key={h} style={s.th}>{h}</th>
+                ))}
+              </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => {
-                const pct = s.max_students > 0 ? Math.round((s.enrolled_count / s.max_students) * 100) : 0;
-                const full = s.enrolled_count >= s.max_students;
-                return (
-                  <tr key={s.id} style={styles.tr}>
-                    <td style={styles.td}><span style={styles.badge}>{s.name}</span></td>
-                    <td style={styles.td}>{s.subject_name ?? s.subject}</td>
-                    <td style={styles.td}>{s.schedule ?? '—'}</td>
-                    <td style={styles.td}>{s.room ?? '—'}</td>
-                    <td style={styles.td}>{s.max_students}</td>
-                    <td style={styles.td}>
-                      <span style={{ ...styles.capacityBadge, background: full ? '#FEE2E2' : '#EEF2FF', color: full ? '#DC2626' : '#4F46E5' }}>
-                        {s.enrolled_count ?? 0}/{s.max_students} ({pct}%)
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <button onClick={() => navigate(`/sections/${s.id}/edit`)} style={styles.btnSm}>Edit</button>
-                      <button onClick={() => handleDelete(s.id)} style={{ ...styles.btnSm, ...styles.btnDanger }}>Delete</button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {filtered.map((sec, idx) => (
+                <tr key={sec.id} style={{ borderBottom: idx < filtered.length - 1 ? '1px solid #F1F5F9' : 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F8F9FC'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={s.td}>
+                    <div style={{ fontWeight: 600, color: '#4F46E5', fontSize: '0.875rem' }}>{sec.subject_code}</div>
+                    <div style={{ color: '#94A3B8', fontSize: '0.75rem' }}>{sec.subject_name}</div>
+                  </td>
+                  <td style={s.td}><span style={{ fontWeight: 600, color: '#1E293B' }}>Section {sec.name}</span></td>
+                  <td style={s.td}>{sec.schedule || '—'}</td>
+                  <td style={s.td}>{sec.room || '—'}</td>
+                  <td style={s.td}>{sec.instructor || '—'}</td>
+                  <td style={s.td}>
+                    <div style={{ fontWeight: 600, color: '#1E293B', fontSize: '0.875rem' }}>{sec.enrolled_count}/{sec.max_students}</div>
+                    <div style={{ marginTop: 4, height: 4, background: '#F1F5F9', borderRadius: 99, overflow: 'hidden', width: 80 }}>
+                      <div style={{ height: 4, borderRadius: 99, background: sec.is_full ? '#DC2626' : '#4F46E5', width: (sec.enrolled_count / sec.max_students * 100) + '%' }} />
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: 2 }}>{sec.available_slots} slots left</div>
+                  </td>
+                  <td style={s.td}>
+                    <span style={{ padding: '0.2rem 0.6rem', borderRadius: 99, fontSize: '0.72rem', fontWeight: 600, background: sec.is_full ? '#FEE2E2' : '#D1FAE5', color: sec.is_full ? '#991B1B' : '#065F46' }}>
+                      {sec.is_full ? 'Full' : 'Open'}
+                    </span>
+                  </td>
+                  <td style={s.td}>
+                    <button onClick={() => navigate(`/sections/${sec.id}/edit`)} style={s.editBtn}>Edit</button>
+                    <button onClick={() => handleDelete(sec.id)} style={s.deleteBtn}>Delete</button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -84,25 +96,31 @@ function SectionList() {
 function SectionForm() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [form, setForm] = useState({ name: '', subject: '', schedule: '', room: '', max_students: '' });
   const [subjects, setSubjects] = useState([]);
+  const [form, setForm] = useState({ name: '', subject: '', max_students: '40', room: '', schedule: '', instructor: '', school_year: '2024-2025', semester: '1', is_active: true });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
     api.get('/subjects/').then(({ data }) => setSubjects(data.results ?? data)).catch(() => {});
-    if (id) api.get(`/sections/${id}/`).then(({ data }) => setForm(data)).catch(() => setError('Failed to load section.'));
+    if (id) {
+      api.get(`/sections/${id}/`).then(({ data }) => setForm({ ...data, max_students: String(data.max_students), semester: String(data.semester) })).finally(() => setFetchLoading(false));
+    } else { setFetchLoading(false); }
   }, [id]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handle = e => {
+    const { name, value, type, checked } = e.target;
+    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setError(''); setLoading(true);
     try {
-      if (id) await api.put(`/sections/${id}/`, form);
-      else await api.post('/sections/', form);
+      const payload = { ...form, max_students: Number(form.max_students), semester: Number(form.semester) };
+      if (id) await api.patch(`/sections/${id}/`, payload);
+      else await api.post('/sections/', payload);
       navigate('/sections');
     } catch (err) {
       const data = err.response?.data;
@@ -110,41 +128,70 @@ function SectionForm() {
     } finally { setLoading(false); }
   };
 
+  const inp = { padding: '0.55rem 0.75rem', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: '0.875rem', color: '#0F172A', background: '#fff', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' };
+  const lbl = { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.3rem' };
+
+  if (fetchLoading) return <div style={{ padding: '2rem', color: '#64748B' }}>Loading...</div>;
+
   return (
-    <div style={styles.page}>
-      <button onClick={() => navigate('/sections')} style={styles.back}>← Back to Sections</button>
-      <div style={styles.formCard}>
-        <h2 style={styles.title}>{id ? 'Edit Section' : 'Create Section'}</h2>
-        {error && <div style={styles.error}>{error}</div>}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Section Name</label>
-              <input name="name" value={form.name} onChange={handleChange} required placeholder="CS101-A" style={styles.input} />
+    <div style={{ maxWidth: 600 }}>
+      <button onClick={() => navigate('/sections')} style={s.backBtn}>← Back</button>
+      <h1 style={{ ...s.title, marginBottom: '1.5rem' }}>{id ? 'Edit Section' : 'Create New Section'}</h1>
+      {error && <div style={s.error}>{error}</div>}
+      <div style={s.formCard}>
+        <form onSubmit={handleSubmit} noValidate>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={lbl}>Subject *</label>
+            <select name="subject" value={form.subject} onChange={handle} required style={inp}>
+              <option value="">— Select Subject —</option>
+              {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.code} - {sub.name}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>Section Name *</label>
+              <input name="name" value={form.name} onChange={handle} required placeholder="e.g. A, B, Section 1" style={inp} />
             </div>
-            <div style={styles.field}>
-              <label style={styles.label}>Max Students</label>
-              <input name="max_students" type="number" min="1" value={form.max_students} onChange={handleChange} required style={styles.input} />
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>Max Students *</label>
+              <input name="max_students" type="number" min="1" value={form.max_students} onChange={handle} required style={inp} />
             </div>
           </div>
-          <label style={styles.label}>Subject</label>
-          <select name="subject" value={form.subject} onChange={handleChange} required style={styles.input}>
-            <option value="">Select subject…</option>
-            {subjects.map((s) => <option key={s.id} value={s.id}>{s.code} — {s.name}</option>)}
-          </select>
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Schedule</label>
-              <input name="schedule" value={form.schedule} onChange={handleChange} placeholder="MWF 8:00-9:00 AM" style={styles.input} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>Room</label>
+              <input name="room" value={form.room} onChange={handle} placeholder="e.g. Room 101" style={inp} />
             </div>
-            <div style={styles.field}>
-              <label style={styles.label}>Room</label>
-              <input name="room" value={form.room} onChange={handleChange} placeholder="Room 201" style={styles.input} />
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>Schedule</label>
+              <input name="schedule" value={form.schedule} onChange={handle} placeholder="e.g. MWF 7:30-9:00 AM" style={inp} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-            <button type="submit" disabled={loading} style={styles.btnPrimary}>{loading ? 'Saving…' : 'Save Section'}</button>
-            <button type="button" onClick={() => navigate('/sections')} style={styles.btnSecondary}>Cancel</button>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={lbl}>Instructor</label>
+            <input name="instructor" value={form.instructor} onChange={handle} placeholder="e.g. Prof. Santos" style={inp} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>School Year *</label>
+              <input name="school_year" value={form.school_year} onChange={handle} placeholder="e.g. 2024-2025" style={inp} />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={lbl}>Semester *</label>
+              <select name="semester" value={form.semester} onChange={handle} style={inp}>
+                <option value="1">1st Semester</option>
+                <option value="2">2nd Semester</option>
+                <option value="3">Summer</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <input type="checkbox" name="is_active" id="is_active" checked={form.is_active} onChange={handle} style={{ width: 16, height: 16, accentColor: '#4F46E5' }} />
+            <label htmlFor="is_active" style={{ fontSize: '0.875rem', color: '#374151', cursor: 'pointer' }}>Active section</label>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button type="button" onClick={() => navigate('/sections')} style={s.cancelBtn}>Cancel</button>
+            <button type="submit" disabled={loading} style={s.submitBtn}>{loading ? 'Saving...' : id ? 'Save Changes' : 'Create Section'}</button>
           </div>
         </form>
       </div>
@@ -162,30 +209,21 @@ export default function Sections() {
   );
 }
 
-const styles = {
-  page: { padding: '2rem' },
+const s = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' },
-  title: { fontSize: '1.75rem', fontWeight: 700, color: '#111827', margin: 0 },
-  subtitle: { color: '#6B7280', fontSize: '0.9rem', marginTop: '0.25rem' },
-  btnPrimary: { padding: '0.6rem 1.2rem', background: '#D97706', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' },
-  btnSecondary: { padding: '0.6rem 1.2rem', background: '#F3F4F6', color: '#374151', border: '1px solid #D1D5DB', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.9rem' },
-  btnSm: { padding: '0.3rem 0.6rem', background: '#FFFBEB', color: '#D97706', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', marginRight: '0.4rem', fontWeight: 500 },
-  btnDanger: { background: '#FEF2F2', color: '#DC2626' },
-  search: { width: '100%', maxWidth: '360px', padding: '0.6rem 0.875rem', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '1.25rem', background: '#F9FAFB', boxSizing: 'border-box' },
-  error: { background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.9rem' },
-  empty: { color: '#9CA3AF', padding: '2rem', textAlign: 'center' },
-  tableWrap: { background: '#fff', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflow: 'auto' },
+  title: { fontSize: '1.375rem', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em', margin: 0 },
+  subtitle: { color: '#64748B', fontSize: '0.8rem', marginTop: 2 },
+  btnPrimary: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' },
+  search: { width: '100%', maxWidth: 360, padding: '0.5rem 0.75rem', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: '0.875rem', marginBottom: '1rem', boxSizing: 'border-box', outline: 'none' },
+  error: { background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' },
+  tableWrap: { background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0', overflow: 'hidden' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #E5E7EB', background: '#F9FAFB', textTransform: 'uppercase', letterSpacing: '0.04em' },
-  tr: { borderBottom: '1px solid #F3F4F6' },
-  td: { padding: '0.85rem 1rem', fontSize: '0.9rem', color: '#374151' },
-  badge: { background: '#FFFBEB', color: '#D97706', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 },
-  capacityBadge: { padding: '0.2rem 0.6rem', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 500 },
-  formCard: { background: '#fff', borderRadius: '12px', padding: '2rem', maxWidth: '600px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' },
-  form: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  row: { display: 'flex', gap: '0.75rem' },
-  field: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' },
-  label: { fontSize: '0.875rem', fontWeight: 500, color: '#374151', marginTop: '0.5rem' },
-  input: { padding: '0.65rem 0.875rem', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '0.95rem', color: '#111827', background: '#F9FAFB' },
-  back: { background: 'none', border: 'none', color: '#D97706', cursor: 'pointer', fontWeight: 500, fontSize: '0.9rem', marginBottom: '1.25rem', padding: 0 },
+  th: { padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #E2E8F0' },
+  td: { padding: '0.875rem 1rem', fontSize: '0.875rem', color: '#475569' },
+  editBtn: { padding: '0.3rem 0.6rem', background: '#F8F9FC', border: '1px solid #E2E8F0', borderRadius: 6, fontSize: '0.78rem', fontWeight: 500, color: '#475569', cursor: 'pointer', marginRight: 6 },
+  deleteBtn: { padding: '0.3rem 0.6rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, fontSize: '0.78rem', fontWeight: 500, color: '#DC2626', cursor: 'pointer' },
+  formCard: { background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0', padding: '1.5rem' },
+  backBtn: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '0.4rem 0.75rem', background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, cursor: 'pointer', fontSize: '0.875rem', color: '#64748B', fontFamily: 'inherit', marginBottom: '1rem' },
+  cancelBtn: { flex: 1, padding: '0.7rem', background: '#F8F9FC', border: '1px solid #E2E8F0', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', color: '#475569', fontFamily: 'inherit' },
+  submitBtn: { flex: 2, padding: '0.7rem', background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit' },
 };
