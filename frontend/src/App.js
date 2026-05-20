@@ -49,7 +49,14 @@ function Sidebar() {
   ];
 
   return (
-    <aside style={{ width: 240, background: '#fff', borderRight: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 50 }}>
+    <aside style={{
+      width: 240, background: '#fff',
+      borderRight: '1px solid #E2E8F0',
+      display: 'flex', flexDirection: 'column',
+      height: '100vh', position: 'fixed',
+      top: 0, left: 0, zIndex: 50,
+    }}>
+      {/* Logo */}
       <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #E2E8F0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
           <div style={{ width: 34, height: 34, background: '#4F46E5', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -62,8 +69,11 @@ function Sidebar() {
         </div>
       </div>
 
+      {/* Nav items */}
       <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0.25rem 0.75rem', marginBottom: '0.25rem' }}>Main Menu</div>
+        <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0.25rem 0.75rem', marginBottom: '0.25rem' }}>
+          Main Menu
+        </div>
         {navItems.filter(i => !i.adminOnly || isAdminOrStaff).map(item => (
           <NavLink key={item.to} to={item.to} style={({ isActive }) => ({
             display: 'flex', alignItems: 'center', gap: '0.625rem',
@@ -79,22 +89,49 @@ function Sidebar() {
         ))}
       </nav>
 
+      {/* User footer */}
       <div style={{ padding: '0.75rem', borderTop: '1px solid #E2E8F0' }}>
-        <NavLink to="/profile" style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.55rem 0.75rem', borderRadius: 7, background: isActive ? '#EEF2FF' : 'transparent', textDecoration: 'none', marginBottom: 2 })}>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#4F46E5', flexShrink: 0, overflow: 'hidden', border: '1.5px solid #E2E8F0' }}>
-            {user?.profile_picture
-              ? <img src={user.profile_picture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none'; }} />
-              : <span>{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
-            }
+        <NavLink to="/profile" style={({ isActive }) => ({
+          display: 'flex', alignItems: 'center', gap: '0.625rem',
+          padding: '0.55rem 0.75rem', borderRadius: 7,
+          background: isActive ? '#EEF2FF' : 'transparent',
+          textDecoration: 'none', marginBottom: 2,
+        })}>
+          {/* Avatar — shows photo if available, initials if not */}
+          <div style={{
+            width: 30, height: 30, borderRadius: '50%',
+            background: '#EEF2FF', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700,
+            color: '#4F46E5', flexShrink: 0, overflow: 'hidden',
+            border: '1.5px solid #E2E8F0',
+          }}>
+            {user?.profile_picture ? (
+              <img
+                src={user.profile_picture}
+                alt=""
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={e => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <span>{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
+            )}
           </div>
           <div style={{ flex: 1, overflow: 'hidden' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.first_name} {user?.last_name}</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.first_name} {user?.last_name}
+            </div>
             <div style={{ fontSize: '0.7rem', color: '#94A3B8', textTransform: 'capitalize' }}>{user?.role}</div>
           </div>
         </NavLink>
-        <button onClick={logout} style={{ width: '100%', padding: '0.5rem 0.75rem', background: 'none', border: 'none', borderRadius: 7, fontSize: '0.8rem', color: '#DC2626', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'background 0.12s', fontFamily: 'inherit' }}
-          onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+        <button onClick={logout} style={{
+          width: '100%', padding: '0.5rem 0.75rem',
+          background: 'none', border: 'none', borderRadius: 7,
+          fontSize: '0.8rem', color: '#DC2626', cursor: 'pointer',
+          textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.5rem',
+          transition: 'background 0.12s', fontFamily: 'inherit',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
+        onMouseLeave={e => e.currentTarget.style.background = 'none'}>
           <RiLogoutBoxLine style={{ fontSize: '1rem' }} /> Sign out
         </button>
       </div>
@@ -106,7 +143,9 @@ function AppLayout({ children }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, padding: '2rem', minHeight: '100vh', background: '#F8F9FC' }}>{children}</main>
+      <main style={{ marginLeft: 240, flex: 1, padding: '2rem', minHeight: '100vh', background: '#F8F9FC' }}>
+        {children}
+      </main>
       <Chatbot />
     </div>
   );
@@ -116,7 +155,11 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <React.Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}><div style={{ color: '#4F46E5' }}>Loading...</div></div>}>
+        <React.Suspense fallback={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+            <div style={{ color: '#4F46E5' }}>Loading...</div>
+          </div>
+        }>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -126,13 +169,14 @@ export default function App() {
             <Route path="/students" element={<ProtectedRoute><AppLayout><Students /></AppLayout></ProtectedRoute>} />
             <Route path="/students/new" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><StudentForm /></AppLayout></ProtectedRoute>} />
             <Route path="/students/:id/edit" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><StudentForm /></AppLayout></ProtectedRoute>} />
-
             {/* subjects/* allows nested routes inside Subjects.js */}
             <Route path="/subjects/*" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><Subjects /></AppLayout></ProtectedRoute>} />
 
             {/* sections/* allows nested routes inside Sections.js */}
             <Route path="/sections/*" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><Sections /></AppLayout></ProtectedRoute>} />
 
+            <Route path="/subjects" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><Subjects /></AppLayout></ProtectedRoute>} />
+            <Route path="/sections" element={<ProtectedRoute roles={['admin','staff']}><AppLayout><Sections /></AppLayout></ProtectedRoute>} />
             <Route path="/enrollments" element={<ProtectedRoute><AppLayout><Enrollments /></AppLayout></ProtectedRoute>} />
             <Route path="/enrollments/new" element={<ProtectedRoute><AppLayout><EnrollmentForm /></AppLayout></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
