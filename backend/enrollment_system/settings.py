@@ -7,6 +7,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# =========================
+# CORE SETTINGS
+# =========================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production')
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
@@ -16,16 +19,37 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,enrollment-system-enrollhub.onrender.com'
 ).split(',')
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://enrollment-system-enrollhub.onrender.com",
-    "https://enrollment-system-enroll-hub.vercel.app",
-]
-
+# =========================
+# FRONTEND / BACKEND URLS
+# =========================
 FRONTEND_URL = os.environ.get(
     'FRONTEND_URL',
     'http://localhost:3000'
 )
 
+BACKEND_URL = os.environ.get(
+    'BACKEND_URL',
+    'https://enrollment-system-enrollhub.onrender.com'
+)
+
+# =========================
+# CSRF / CORS
+# =========================
+CSRF_TRUSTED_ORIGINS = [
+    "https://enrollment-system-enrollhub.onrender.com",
+    "https://enrollment-system-enroll-hub.vercel.app",
+]
+
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:19006,https://enrollment-system-enroll-hub.vercel.app'
+).split(',')
+
+CORS_ALLOW_CREDENTIALS = True
+
+# =========================
+# INSTALLED APPS
+# =========================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -34,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party apps
+    # Third-party
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -50,6 +74,9 @@ INSTALLED_APPS = [
     'apps.enrollments',
 ]
 
+# =========================
+# MIDDLEWARE
+# =========================
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -66,6 +93,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'enrollment_system.urls'
 
+# =========================
+# TEMPLATES
+# =========================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -85,7 +115,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'enrollment_system.wsgi.application'
 
 # =========================
-# DATABASE CONFIG
+# DATABASE
 # =========================
 if os.environ.get('DATABASE_URL'):
     import dj_database_url
@@ -105,6 +135,9 @@ else:
         }
     }
 
+# =========================
+# AUTH
+# =========================
 AUTH_USER_MODEL = 'accounts.User'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -114,6 +147,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# =========================
+# REST FRAMEWORK
+# =========================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -125,6 +161,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
+# =========================
+# SIMPLE JWT
+# =========================
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -132,17 +171,9 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://localhost:19006,https://enrollment-system-enroll-hub.vercel.app'
-).split(',')
-
-CORS_ALLOW_CREDENTIALS = True
-
 # =========================
 # EMAIL CONFIG (FIXED)
 # =========================
-
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND",
     "django.core.mail.backends.smtp.EmailBackend"
@@ -157,10 +188,9 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# Prevent Render timeout issues
 EMAIL_TIMEOUT = 10
 
-# Local dev fallback (important)
+# Local dev fallback (console emails)
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -175,16 +205,20 @@ CLOUDINARY_STORAGE = {
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# =========================
+# STATIC / MEDIA
+# =========================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = (
-    'whitenoise.storage.CompressedManifestStaticFilesStorage'
-)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# =========================
+# TIME / LANGUAGE
+# =========================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Manila'
 
@@ -194,7 +228,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =========================
-# SECURITY SETTINGS
+# SECURITY
 # =========================
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

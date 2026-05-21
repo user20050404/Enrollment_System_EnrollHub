@@ -12,19 +12,22 @@ User = get_user_model()
 
 
 # =========================
-# EMAIL FUNCTION (FIXED)
+# EMAIL SENDER (FIXED)
 # =========================
 def send_verification_email(user):
     try:
         token = str(user.verification_token)
-        verify_url = f"{settings.FRONTEND_URL}/verify-email/{token}"
+
+        # ✅ IMPORTANT FIX: use BACKEND endpoint, not frontend
+        verify_url = f"{settings.BACKEND_URL}/api/auth/verify/{token}/"
 
         send_mail(
             subject="Verify your enrollment account",
             message=(
                 f"Hi {user.first_name},\n\n"
-                f"Please verify your account:\n{verify_url}\n\n"
-                f"This link is required before login."
+                f"Click the link below to verify your account:\n\n"
+                f"{verify_url}\n\n"
+                f"If you did not register, ignore this email."
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
@@ -48,17 +51,16 @@ class RegisterView(generics.CreateAPIView):
 
         user = serializer.save()
 
-        # IMPORTANT: do NOT block registration if email fails
         send_verification_email(user)
 
         return Response({
-            "message": "Registration successful. Check your email.",
+            "message": "Registration successful. Check your email to verify your account.",
             "user": UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
 
 
 # =========================
-# VERIFY EMAIL
+# VERIFY EMAIL (FIXED)
 # =========================
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -68,15 +70,18 @@ class VerifyEmailView(APIView):
             user = User.objects.get(verification_token=token)
 
             if user.is_verified:
-                return Response({'message': 'Email already verified.'})
+                return Response({"message": "Email already verified."})
 
             user.is_verified = True
+
+            # 🔥 IMPORTANT FIX: invalidate token after use
+            user.verification_token = None
             user.save()
 
-            return Response({'message': 'Email verified successfully.'})
+            return Response({"message": "Email verified successfully."})
 
         except User.DoesNotExist:
-            return Response({'error': 'Invalid token.'}, status=400)
+            return Response({"error": "Invalid or expired verification link."}, status=400)
 
 
 # =========================
