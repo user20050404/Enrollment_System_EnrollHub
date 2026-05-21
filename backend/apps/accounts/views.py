@@ -32,8 +32,8 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         try:
             send_verification_email(user, request)
-        except Exception:
-            pass  # Don't block registration if email fails
+        except Exception as e:
+              print("EMAIL ERROR:", str(e))
         return Response({
             'message': 'Registration successful. Check your email to verify your account.',
             'user': UserSerializer(user).data
