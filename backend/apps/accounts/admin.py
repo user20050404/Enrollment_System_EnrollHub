@@ -1,29 +1,18 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(admin.ModelAdmin):
     list_display = ['email', 'first_name', 'last_name', 'role', 'is_verified', 'is_active']
     list_filter = ['role', 'is_verified', 'is_active']
     search_fields = ['email', 'first_name', 'last_name']
     ordering = ['-date_joined']
+    readonly_fields = ['date_joined', 'verification_token', 'id']
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        ('Account', {'fields': ('id', 'email', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'profile_picture')}),
         ('Permissions', {'fields': ('role', 'is_verified', 'is_active', 'is_staff', 'is_superuser')}),
-        ('Important dates', {'fields': ('date_joined',)}),
+        ('Dates', {'fields': ('date_joined', 'verification_token')}),
     )
-
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'first_name', 'last_name', 'password1', 'password2', 'role'),
-        }),
-    )
-
-    readonly_fields = ['date_joined']
-
-    filter_horizontal = ()
