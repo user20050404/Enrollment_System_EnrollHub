@@ -112,3 +112,49 @@ class LoginView(APIView):
             "refresh": str(refresh),
             "user": UserSerializer(user).data,
         })
+
+
+# =========================
+# PROFILE VIEW (GET & PUT)
+# =========================
+class ProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({
+            "message": "Profile updated successfully.",
+            "user": serializer.data
+        })
+
+
+# =========================
+# CHANGE PASSWORD
+# =========================
+class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        
+        # Set new password
+        request.user.set_password(serializer.validated_data['new_password'])
+        request.user.save()
+        
+        return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
+
+
+# =========================
+# USER LIST (ADMIN ONLY)
+# =========================
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
