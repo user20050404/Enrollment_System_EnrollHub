@@ -192,8 +192,6 @@ BACKEND_URL = os.environ.get(
     "https://enrollment-system-enrollhub.onrender.com"
 )
 
-# ⚠️ REMOVE console email backend completely (this breaks Gmail sending)
-
 # =========================
 # CLOUDINARY
 # =========================
@@ -211,7 +209,11 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use simple storage for production to avoid manifest errors
+if DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
