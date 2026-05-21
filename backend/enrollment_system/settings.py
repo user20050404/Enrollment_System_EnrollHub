@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -66,7 +65,6 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
 
-    # Local apps
     'apps.accounts',
     'apps.students',
     'apps.subjects',
@@ -172,27 +170,29 @@ SIMPLE_JWT = {
 }
 
 # =========================
-# EMAIL CONFIG (FIXED)
+# EMAIL CONFIG (FINAL FIXED VERSION)
 # =========================
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND",
-    "django.core.mail.backends.smtp.EmailBackend"
-)
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_TIMEOUT = 10
 
-# Local dev fallback (console emails)
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# IMPORTANT: backend URL used in verification links
+BACKEND_URL = os.environ.get(
+    "BACKEND_URL",
+    "https://enrollment-system-enrollhub.onrender.com"
+)
+
+# ⚠️ REMOVE console email backend completely (this breaks Gmail sending)
 
 # =========================
 # CLOUDINARY
@@ -217,7 +217,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # =========================
-# TIME / LANGUAGE
+# LANGUAGE / TIMEZONE
 # =========================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Manila'
