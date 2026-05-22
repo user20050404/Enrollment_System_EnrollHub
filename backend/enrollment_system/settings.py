@@ -16,15 +16,8 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,enrollment-system-enrollhub.onrender.com'
 ).split(',')
 
-FRONTEND_URL = os.environ.get(
-    'FRONTEND_URL',
-    'http://localhost:3000'
-)
-
-BACKEND_URL = os.environ.get(
-    'BACKEND_URL',
-    'https://enrollment-system-enrollhub.onrender.com'
-)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+BACKEND_URL = os.environ.get('BACKEND_URL', 'https://enrollment-system-enrollhub.onrender.com')
 
 CSRF_TRUSTED_ORIGINS = [
     "https://enrollment-system-enrollhub.onrender.com",
@@ -39,17 +32,18 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
+    'corsheaders',
+    # CRITICAL: cloudinary_storage MUST go before staticfiles
+    'cloudinary_storage', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
-    'cloudinary',
-    'cloudinary_storage',
     'apps.accounts',
     'apps.students',
     'apps.subjects',
@@ -60,7 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Serves production assets
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,7 +63,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'enrollment_system.urls'
+# CRITICAL FIX: Changed from enrollment_system to backend
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -87,7 +82,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'enrollment_system.wsgi.application'
+# CRITICAL FIX: Changed from enrollment_system to backend
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 if os.environ.get('DATABASE_URL'):
     import dj_database_url
@@ -148,10 +144,8 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-if DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-else:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# CRITICAL FIX: Use simple storage to prevent strict build crashes on missing source maps
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
