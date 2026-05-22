@@ -11,7 +11,7 @@ echo "Collecting static files..."
 python manage.py collectstatic --no-input --clear
 
 echo "Running migrations..."
-python manage.py migrate --run-syncdb
+python manage.py migrate
 
 echo "Creating superuser..."
 python manage.py shell -c "
