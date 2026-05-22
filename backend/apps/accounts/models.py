@@ -1,52 +1,76 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from django.db import models
 import uuid
+from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from cloudinary.models import CloudinaryField
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email is required')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra):
-        extra.setdefault('role', 'admin')
-        extra.setdefault('is_staff', True)
-        extra.setdefault('is_superuser', True)
-        extra.setdefault('is_verified', True)
-        return self.create_user(email, password, **extra)
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_verified', True)
+        extra_fields.setdefault('role', 'admin')
+        return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('staff', 'Staff'),
-        ('student', 'Student'),
-    ]
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class User(AbstractUser):
+    # Remove username field
+    username = None
+    
+    # Use email as unique identifier
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    
+    # Custom fields
+    role = models.CharField(
+        max_length=20,
+        choices=[
+            ('admin', 'Admin'),
+            ('staff', 'Staff'),
+            ('student', 'Student'),
+        ],
+        default='student'
+    )
+    
+    verification_token = models.UUIDField(default=uuid.uuid4, editable=False, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-    verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
-    objects = UserManager()
-
-    def __str__(self):
-        return f'{self.first_name} {self.last_name} ({self.email})'
-
+    
+    profile_picture = CloudinaryField('image', null=True, blank=True)
+    
+    # Add these methods that Django admin expects
+    def get_short_name(self):
+        """Returns the short name for the user."""
+        return self.first_name or self.email.split('@')[0]
+    
+    def get_full_name(self):
+        """Returns the full name for the user."""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.email
+    
+    # Property for serializer
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.get_full_name()
+    
+    # Required for custom user model
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+    
+    objects = UserManager()
+    
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+    
+    def __str__(self):
+        return f"{self.get_full_name()} ({self.email})"

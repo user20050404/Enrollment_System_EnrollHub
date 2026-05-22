@@ -170,27 +170,16 @@ SIMPLE_JWT = {
 }
 
 # =========================
-# EMAIL CONFIG (FINAL FIXED VERSION)
+# EMAIL CONFIG (GMAIL SMTP - OPTION 1)
 # =========================
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-EMAIL_TIMEOUT = 10
-
-# IMPORTANT: backend URL used in verification links
-BACKEND_URL = os.environ.get(
-    "BACKEND_URL",
-    "https://enrollment-system-enrollhub.onrender.com"
-)
+EMAIL_TIMEOUT = 30  # Increased timeout for Render
 
 # =========================
 # CLOUDINARY
