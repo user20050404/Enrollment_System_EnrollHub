@@ -1,15 +1,31 @@
 #!/usr/bin/env bash
-# exit on error
 set -o errexit
 
-# Install dependencies
+echo "Installing dependencies..."
 pip install -r requirements.txt
 
-# Create static files directory
+echo "Creating static files directory..."
 mkdir -p staticfiles
 
-# Collect static files (use simpler storage first)
+echo "Collecting static files..."
 python manage.py collectstatic --no-input --clear
 
-# Run migrations
-python manage.py migrate
+echo "Running migrations..."
+python manage.py migrate --run-syncdb
+
+echo "Creating superuser..."
+python manage.py shell -c "
+from apps.accounts.models import User;
+if not User.objects.filter(email='kd.aligsao@gmail.com').exists():
+    User.objects.create_superuser(
+        email='kd.aligsao@gmail.com',
+        password='Admin@12345',
+        first_name='Kent',
+        last_name='Aligsao'
+    );
+    print('Superuser created!');
+else:
+    print('Superuser already exists.');
+"
+
+echo "Build completed!"
