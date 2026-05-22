@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 set -o errexit
 
-echo "Upgrading pip..."
+# Ensure pip is up to date
 python -m pip install --upgrade pip
 
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
+# CRITICAL STEP: Move into the directory containing manage.py
+cd backend
+
 echo "Collecting static files..."
-python manage.py collectstatic --no-input
+# Added --no-post-process flag to prevent WhiteNoise compression failure on broken pathing
+python manage.py collectstatic --no-input --no-post-process
 
 echo "Running migrations..."
 python manage.py migrate
