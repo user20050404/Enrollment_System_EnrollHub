@@ -170,16 +170,15 @@ SIMPLE_JWT = {
 }
 
 # =========================
-# EMAIL CONFIG (GMAIL SMTP - OPTION 1)
+# EMAIL CONFIG (TEMPORARY - PREVENT CRASHES)
 # =========================
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-EMAIL_TIMEOUT = 30  # Increased timeout for Render
+# Since Render blocks SMTP ports on free tier, use console backend for now
+# This will print emails to the Render logs instead of sending them
+# Later, switch to SendGrid or Resend when you have an API key
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER", "kd.aligsao@gmail.com")
+EMAIL_TIMEOUT = 10
 
 # =========================
 # CLOUDINARY
