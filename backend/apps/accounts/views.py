@@ -88,7 +88,6 @@ class VerifyEmailView(APIView):
                 return Response({"message": "Already verified."})
 
             user.is_verified = True
-            user.verification_token = None
             user.save()
 
             return Response({"message": "Email verified successfully."})
